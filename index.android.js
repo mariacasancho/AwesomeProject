@@ -19,6 +19,7 @@ import {
 
 
 var REQUEST_URL = 'https://raw.githubusercontent.com/facebook/react-native/master/docs/MoviesExample.json';
+var API_URL = 'http://10.0.2.2:3000/tvshows';
 
 class AwesomeProject extends Component {
   constructor(props) {
@@ -28,11 +29,28 @@ class AwesomeProject extends Component {
         rowHasChanged: (row1, row2) => row1 !== row2,
       }),
       loaded: false,
+      APISource: new ListView.DataSource({
+        rowHasChanged: (row1, row2) => row1 !== row2,
+      }),
+      APIloaded: false,
     };
   }
 
   componentDidMount() {
     this.fetchData();
+    this.fetchAPI();
+  }
+
+  fetchAPI(){
+    fetch(API_URL)
+      .then((response) => response.json())
+      .then((responseData) => {
+        this.setState({
+          APISource: this.state.APISource.cloneWithRows(responseData),
+          APIloaded: true,
+        });
+      })
+      .done();
   }
 
   fetchData() {
@@ -54,8 +72,8 @@ class AwesomeProject extends Component {
 
     return (
       <ListView
-        dataSource={this.state.dataSource}
-        renderRow={this.renderMovie}
+        dataSource={this.state.APISource}
+        renderRow={this.renderPaco}
         style={styles.listView}
       />
     );
@@ -85,7 +103,22 @@ class AwesomeProject extends Component {
       </View>
     );
   }
-  
+
+  renderPaco(shows) {
+    return (
+      <View style={styles.container}>
+        <Image
+          source={{uri: shows.poster}}
+          style={styles.thumbnail}
+        />
+        <View style={styles.rightContainer}>
+          <Text style={styles.title}>{shows.title}</Text>
+          <Text style={styles.year}>{shows.year}</Text>
+        </View>
+      </View>
+    );
+  }
+
 }
 
 const styles = StyleSheet.create({
